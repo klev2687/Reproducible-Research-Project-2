@@ -1,0 +1,10 @@
+---
+title: "Storm"
+output: html_document
+---
+
+Read data from zip file
+```{r}
+data <- read.csv("repdata-data-StormData.csv.bz2")
+```
+The file has column EVTYPE that describes the Event Type that was recorded for the period. The data needs to be filtered to inlcude only valid event types as stated in the Storm Data Documentation.
