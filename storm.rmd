@@ -1,24 +1,59 @@
 ---
 title: "Storm"
 output: html_document
+keep_md: TRUE
 ---
-library(plyr)
-
-Read data from zip file
-```{r eval=FALSE}
-data <- read.csv("repdata-data-StormData.csv.bz2")
-```
-The file has column EVTYPE that describes the Event Type that was recorded for the period. The data needs to be filtered to inlcude only valid event types as stated in the Storm Data Documentation.
 ```{r}
-official_events <- c("Astronomical Low Tide","Avalanche", "Blizzard","Coastal Flood","Cold/Wind Chill",
-                     "Debris Flow","Dense Fog","Dense Smoke","Drought", "Dust Devil", "Dust Storm",
-                     "Excessive Heat", "Extreme Cold/Wind Chill","Flash Flood","Flood", "Freezing Fog",
-                     "Frost/Freeze","Funnel Cloud", "Hail", "Heat", "Heavy Rain", "Heavy Snow","High Surf",
-                     "High Wind","Hurricane/Typhoon","Ice Storm","Lakeshore Flood","Lake-Effect Snow",
-                     "Lightning","Marine Hail","Marine High Wind", "Marine Strong Wind",
-                     "Marine Thunderstorm Wind","Rip Current","Sieche","Sleet","Storm Tide","Strong Wind",
-                     "Thunderstorm Wind","Tornado","Tropical Depression","Tropical Storm","Tsunami",
-                     "Volcanic Ash","Waterspout","Wildfire","Winter Storm","Winter Weather")
-recorded_events <- count(data, "EVTYPE")
+library(plyr)
+library(lubridate)
+library(dplyr)
+library(stringdist)
 ```
-Event types descriptions in recorded_events need to mapped to appropriate official_events categories
+Read data from zip file and running basic transformations.  
+```{r read/transform}
+data <- read.csv("repdata-data-StormData.csv.bz2")
+data$BGN_DATE <- mdy_hms(data$BGN_DATE)
+```
+The file has column EVTYPE that describes the Event Type that was recorded for the period. The data needs to be filtered to inlcude only valid event types as stated in the Storm Data Documentation.  
+```{r official event types}
+off_events <- data.frame(Event = c("Astronomical Low Tide","Avalanche", "Blizzard","Coastal Flood",
+                                   "Cold/Wind Chill","Debris Flow","Dense Fog","Dense Smoke","Drought",
+                                   "Dust Devil", "Dust Storm", "Excessive Heat", "Extreme Cold/Wind Chill",
+                                   "Flash Flood","Flood", "Freezing Fog", "Frost/Freeze", "Funnel Cloud",
+                                   "Hail", "Heat", "Heavy Rain", "Heavy Snow","High Surf","High Wind", 
+                                   "Hurricane/Typhoon","Ice Storm","Lakeshore Flood","Lake-Effect Snow", 
+                                   "Lightning","Marine Hail","Marine High Wind", "Marine Strong Wind", 
+                                   "Marine Thunderstorm Wind","Rip Current","Sieche","Sleet","Storm Tide",
+                                   "Strong Wind", "Thunderstorm Wind","Tornado","Tropical Depression",
+                                   "Tropical Storm","Tsunami", "Volcanic Ash","Waterspout","Wildfire",
+                                   "Winter Storm","Winter Weather"))
+```
+Event types descriptions in recorded_events need to mapped to appropriate official_events categories.
+[NOAA][1] states that all 48 official event types were recorded starting year 1996. Based on this, the analysis will be conducted starting from year 1996. All records before 1996 will be ignored. The data is subset to columns recording event description, population impact and economic impact.  
+```{r subsetting data}
+sub_storm <- subset(data, 
+                    select = c("BGN_DATE", "EVTYPE","FATALITIES","INJURIES","PROPDMG","PROPDMGEXP",
+                               "CROPDMG","CROPDMGEXP"),
+                    subset = year(BGN_DATE) >= 1996)
+recorded_events <- sub_storm %>% count(EVTYPE)
+```
+Removing summary records and records with zero fatalities, injuries, property damage and crop damage.  
+```{r Cleaning data}
+sub_storm <- sub_storm %>%
+             subset(subset = !grepl("Summary", EVTYPE, ignore.case = TRUE)) %>%
+             subset(subset = FATALITIES != 0 | INJURIES != 0 | PROPDMG != 0 | CROPDMG != 0)   
+
+recorded_events <- sub_storm %>% count(EVTYPE)
+recorded_events <- recorded_events %>% 
+                   mutate(Off.Events = off_events$Event[amatch(recorded_events1$EVTYPE, off_events$Event,
+                                                                method = 'soundex')])
+```
+
+```{r}
+
+
+```
+
+
+
+[1]: http://www.ncdc.noaa.gov/stormevents/details.jsp?type=eventtype "NOAA storm data"
