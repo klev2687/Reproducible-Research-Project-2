@@ -9,14 +9,14 @@ data <- read.csv("repdata-data-StormData.csv.bz2")
 ```
 The file has column EVTYPE that describes the Event Type that was recorded for the period. The data needs to be filtered to inlcude only valid event types as stated in the Storm Data Documentation.
 ```{r}
-valid.evnt <- c("Astronomical Low Tide","Avalanche", "Blizzard","Coastal Flood","Cold/Wind Chill",
-                "Debris Flow","Dense Fog","Dense Smoke","Drought", "Dust Devil", "Dust Storm",
-                "Excessive Heat", "Extreme Cold/Wind Chill","Flash Flood","Flood", "Freezing Fog",
-                "Frost/Freeze","Funnel Cloud", "Hail", "Heat", "Heavy Rain", "Heavy Snow","High Surf",
-                "High Wind","Hurricane/Typhoon","Ice Storm","Lakeshore Flood","Lake-Effect Snow",
-                "Lightning","Marine Hail","Marine High Wind", "Marine Strong Wind",
-                "Marine Thunderstorm Wind","Rip Current","Sieche","Sleet","Storm Tide","Strong Wind",
-                "Thunderstorm Wind","Tornado","Tropical Depression","Tropical Storm","Tsunami",
-                "Volcanic Ash","Waterspout","Wildfire","Winter Storm","Winter Weather")
+official_events <- c("Astronomical Low Tide","Avalanche", "Blizzard","Coastal Flood","Cold/Wind Chill",
+                     "Debris Flow","Dense Fog","Dense Smoke","Drought", "Dust Devil", "Dust Storm",
+                     "Excessive Heat", "Extreme Cold/Wind Chill","Flash Flood","Flood", "Freezing Fog",
+                     "Frost/Freeze","Funnel Cloud", "Hail", "Heat", "Heavy Rain", "Heavy Snow","High Surf",
+                     "High Wind","Hurricane/Typhoon","Ice Storm","Lakeshore Flood","Lake-Effect Snow",
+                     "Lightning","Marine Hail","Marine High Wind", "Marine Strong Wind",
+                     "Marine Thunderstorm Wind","Rip Current","Sieche","Sleet","Storm Tide","Strong Wind",
+                     "Thunderstorm Wind","Tornado","Tropical Depression","Tropical Storm","Tsunami",
+                     "Volcanic Ash","Waterspout","Wildfire","Winter Storm","Winter Weather")
 ```           
 recorded_events <- count(data, "EVTYPE")
