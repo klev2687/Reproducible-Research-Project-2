@@ -47,8 +47,9 @@ recorded_events <- sub_storm %>% count(EVTYPE)
 recorded_events <- recorded_events %>% 
                    mutate(Off.Events = off_events$Event[amatch(recorded_events1$EVTYPE, off_events$Event,
                                                                 method = 'soundex')])
+pct_valid <- round((sum(recorded_events$n[!is.na(recorded_events1$Off.Events)])/sum(recorded_events$n))*100, digits=0)
 ```
-
+About `r pct_valid'% of records have so far been accounted for.
 ```{r}
 
 
