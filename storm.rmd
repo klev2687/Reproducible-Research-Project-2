@@ -37,22 +37,40 @@ sub_storm <- subset(data,
                     subset = year(BGN_DATE) >= 1996)
 recorded_events <- sub_storm %>% count(EVTYPE)
 ```
-Removing summary records and records with zero fatalities, injuries, property damage and crop damage.  
+Removing summary records and records with zero fatalities, injuries, property damage and crop damage. 
 ```{r Cleaning data}
 sub_storm <- sub_storm %>%
              subset(subset = !grepl("Summary", EVTYPE, ignore.case = TRUE)) %>%
              subset(subset = FATALITIES != 0 | INJURIES != 0 | PROPDMG != 0 | CROPDMG != 0)   
 
 recorded_events <- sub_storm %>% count(EVTYPE)
-recorded_events <- recorded_events %>% 
-                   mutate(Off.Events = off_events$Event[amatch(recorded_events1$EVTYPE, off_events$Event,
-                                                                method = 'soundex')])
-pct_valid <- round((sum(recorded_events$n[!is.na(recorded_events1$Off.Events)])/sum(recorded_events$n))*100, digits=0)
 ```
-About `r pct_valid'% of records have so far been accounted for.
-```{r}
+```{r Event mapping}
+recorded_events <- recorded_events %>% 
+                   mutate(Off.Events = off_events$Event[amatch(recorded_events$EVTYPE, off_events$Event,
+                                                                method = 'soundex')])
+pct_valid <- round((sum(recorded_events$n[!is.na(recorded_events$Off.Events)])/sum(recorded_events$n))*100,
+                   digits=0)
+```
+About `r pct_valid`% of records have so far been accounted for.  
+Studying the recording events mapping table, there are some manual corrections that need to make. The manual correction will be focussed on the high occuring events.  
 
-
+Manually mapping records suiting "High Wind" event type
+```{r Mapping High Wind}
+recorded_events$Off.Events[grepl("^TSTM",
+                                 recorded_events$EVTYPE,
+                                 perl = TRUE )] <- "High Wind"
+recorded_events$Off.Events[grep("^Strong Wind",
+                                recorded_events$EVTYPE,
+                                ignore.case = TRUE, perl = TRUE)] <- "High Wind"
+pct_valid <- round((sum(recorded_events$n[!is.na(recorded_events$Off.Events)])/sum(recorded_events$n))*100,
+                   digits=0)
+```
+After manually mapping records, about `r pct_valid`% of records have so far been accounted for.  
+All other events will be categorized as "Other"
+```{r Mapping Other}
+recorded_events$Off.Events <- as.character(recorded_events$Off.Events)
+recorded_events$Off.Events[is.na(recorded_events$Off.Events)] <- "Other"
 ```
 
 
