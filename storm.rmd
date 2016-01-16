@@ -1,24 +1,28 @@
 ---
 title: "Analysis of NOAA Storm Database"
-output: html_document
-keep_md: TRUE
+output:
+  html_document:
+      keep_md: TRUE
 ---
 The following analysis will serve to explore the storms and other severe events. Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern. This analysis involves exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
 
+#Data Processing
 
-#Data Processing 
-```{r warning=FALSE}
+Loading library packages required for the analysis. Please ensure to have the packages installed.
+```{r message=FALSE, warning=FALSE}
 library(plyr)
 library(lubridate)
 library(dplyr)
 library(stringdist)
 ```
+
 Read data from zip file and running basic transformations.  
-```{r read/transform}
+```{r read/transform, cache=TRUE}
 rawdata <- read.csv("repdata-data-StormData.csv.bz2")
 rawdata$BGN_DATE <- mdy_hms(rawdata$BGN_DATE)
 ```
-The file has column EVTYPE that describes the Event Type that was recorded for the period. The data needs to be filtered to inlcude only valid event types as stated in the Storm Data Documentation.  
+
+The file has column EVTYPE that describes the Event Type that was recorded for the period. The data needs to be filtered to inlcude only valid event types as stated in the [Storm Data Documentation][2].  
 ```{r official event types}
 off_events <- data.frame(Event = c("Astronomical Low Tide","Avalanche", "Blizzard","Coastal Flood",
                                    "Cold/Wind Chill","Debris Flow","Dense Fog","Dense Smoke","Drought",
@@ -32,6 +36,7 @@ off_events <- data.frame(Event = c("Astronomical Low Tide","Avalanche", "Blizzar
                                    "Tropical Storm","Tsunami", "Volcanic Ash","Waterspout","Wildfire",
                                    "Winter Storm","Winter Weather"))
 ```
+  
 Event types descriptions in recorded_events need to mapped to appropriate official_events categories.
 [NOAA][1] states that all 48 official event types were recorded starting year 1996. Based on this, the analysis will be conducted starting from year 1996. All records before 1996 will be ignored. The data is subset to columns recording event description, population impact and economic impact.  
 ```{r subsetting data}
@@ -41,6 +46,7 @@ sub_storm <- subset(rawdata,
                     subset = year(BGN_DATE) >= 1996)
 recorded_events <- sub_storm %>% count(EVTYPE)
 ```
+  
 Removing summary records and records with zero fatalities, injuries, property damage and crop damage. 
 ```{r Cleaning data}
 sub_storm <- sub_storm %>%
@@ -49,6 +55,8 @@ sub_storm <- sub_storm %>%
 
 recorded_events <- sub_storm %>% count(EVTYPE)
 ```
+  
+
 ```{r Event mapping}
 recorded_events <- recorded_events %>% 
                    mutate(Off.Events = off_events$Event[amatch(recorded_events$EVTYPE, off_events$Event,
@@ -56,6 +64,7 @@ recorded_events <- recorded_events %>%
 pct_valid <- round((sum(recorded_events$n[!is.na(recorded_events$Off.Events)])/sum(recorded_events$n))*100,
                    digits=0)
 ```
+
 About `r pct_valid`% of records have so far been accounted for.  
 Studying the recording events mapping table, there are some manual corrections that need to make. The manual correction will be focussed on the high occuring events.  
 
@@ -70,12 +79,14 @@ recorded_events$Off.Events[grep("^Strong Wind",
 pct_valid <- round((sum(recorded_events$n[!is.na(recorded_events$Off.Events)])/sum(recorded_events$n))*100,
                    digits=0)
 ```
+
 After manually mapping records, about `r pct_valid`% of records have so far been accounted for.  
 All other events will be categorized as "Other"
 ```{r Mapping Other}
 recorded_events$Off.Events <- as.character(recorded_events$Off.Events)
 recorded_events$Off.Events[is.na(recorded_events$Off.Events)] <- "Other"
 ```
+
 Updating final dataset with official event names.  
 ```{r Final mapping}
 storm_data <- sub_storm %>% 
@@ -84,6 +95,7 @@ storm_data$PROPDMGEXP <- droplevels(storm_data$PROPDMGEXP)
 storm_data$CROPDMGEXP <- droplevels(storm_data$CROPDMGEXP)
 
 ```
+
 Applying powers to Property and Crop Damage figures.  
 ```{r }
 storm_data$PROPDMG[storm_data$PROPDMGEXP =="K"] <- storm_data$PROPDMG[storm_data$PROPDMGEXP =="K"] * 10^3
@@ -96,27 +108,35 @@ storm_data$CROPDMG[storm_data$CROPDMGEXP =="B"] <- storm_data$CROPDMG[storm_data
 ```
 
 #Results
-##Across the United States, which types of events are most harmful with respect to population health?  
-```{r Population plot}
-storm_plot <- storm_data %>% group_by(EVTYPE) %>% summarise(POPULATION_HARM = sum(FATALITIES, INJURIES), ECONOMIC_EFFECTS = sum(PROPDMG,CROPDMG))
-par(mar=c(5,12,4,4))
+
+###Across the United States, which types of events are most harmful with respect to population health?
+
+```{r Population plot, fig.height=8, fig.width=10}
+storm_plot <- storm_data %>% 
+              group_by(EVTYPE) %>% 
+              summarise(POPULATION_HARM = sum(FATALITIES, INJURIES), ECONOMIC_EFFECTS = sum(PROPDMG,CROPDMG))
+par(mar=c(5,10,2,2), las = 1)
 barplot(storm_plot$POPULATION_HARM,
         horiz = TRUE,
         names.arg = storm_plot$EVTYPE,
         xlab = "Population Harmed",
-        main = "Harmful Events With Respect To Population")
-
+        main = "Harmful Events With Respect To Population",
+        cex.names = 0.8,
+        xlim = c(0,round_any(max(storm_plot$POPULATION_HARM), 5000, ceiling)))
 ```
-  
-##Across the United States, which types of events have the greatest economic consequences?
-```{r Economic Consequence}
-barplot(storm_plot$ECONOMIC_EFFECTS,
+
+###Across the United States, which types of events have the greatest economic consequences?
+
+```{r Economic Consequence, fig.height=8, fig.width=10}
+par(mar=c(5,10,2,2), las = 1)
+barplot(storm_plot$ECONOMIC_EFFECTS/10^6,
         horiz = TRUE,
         names.arg = storm_plot$EVTYPE,
-        xlab = "Economic Effect(Dollars)",
-        main = "Economic Consequences Of Events")
-
+        xlab = "Economic Effect(Million Dollars)",
+        main = "Economic Consequences Of Events",
+        cex.names = 0.8,
+        xlim = c(0,round_any(max(storm_plot$ECONOMIC_EFFECTS/10^6), 10^5, ceiling)))
 ```
 
-
 [1]: http://www.ncdc.noaa.gov/stormevents/details.jsp?type=eventtype "NOAA storm data"
+[2]: http://www.nws.noaa.gov/directives/sym/pd01016005curr.pdf "Storm Data Documentation"
