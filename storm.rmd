@@ -22,7 +22,7 @@ rawdata <- read.csv("repdata-data-StormData.csv.bz2")
 rawdata$BGN_DATE <- mdy_hms(rawdata$BGN_DATE)
 ```
 
-The file has column EVTYPE that describes the Event Type that was recorded for the period. The data needs to be filtered to inlcude only valid event types as stated in the [Storm Data Documentation][2].  
+The file has column EVTYPE that describes the Event Type that was recorded for the period. The data needs to be filtered to inlcude only valid event types as stated in the [Storm Data Documentation][1].  
 ```{r official event types}
 off_events <- data.frame(Event = c("Astronomical Low Tide","Avalanche", "Blizzard","Coastal Flood",
                                    "Cold/Wind Chill","Debris Flow","Dense Fog","Dense Smoke","Drought",
@@ -38,7 +38,7 @@ off_events <- data.frame(Event = c("Astronomical Low Tide","Avalanche", "Blizzar
 ```
   
 Event types descriptions in recorded_events need to mapped to appropriate official_events categories.
-[NOAA][1] states that all 48 official event types were recorded starting year 1996. Based on this, the analysis will be conducted starting from year 1996. All records before 1996 will be ignored. The data is subset to columns recording event description, population impact and economic impact.  
+[NOAA][2] states that all 48 official event types were recorded starting year 1996. Based on this, the analysis will be conducted starting from year 1996. All records before 1996 will be ignored. The data is subset to columns recording event description, population impact and economic impact.  
 ```{r subsetting data}
 sub_storm <- subset(rawdata, 
                     select = c("BGN_DATE", "EVTYPE","FATALITIES","INJURIES","PROPDMG","PROPDMGEXP",
@@ -56,7 +56,7 @@ sub_storm <- sub_storm %>%
 recorded_events <- sub_storm %>% count(EVTYPE)
 ```
   
-
+Mapping EVTYPES from official dataset to recorded dataset.  
 ```{r Event mapping}
 recorded_events <- recorded_events %>% 
                    mutate(Off.Events = off_events$Event[amatch(recorded_events$EVTYPE, off_events$Event,
@@ -68,7 +68,7 @@ pct_valid <- round((sum(recorded_events$n[!is.na(recorded_events$Off.Events)])/s
 About `r pct_valid`% of records have so far been accounted for.  
 Studying the recording events mapping table, there are some manual corrections that need to make. The manual correction will be focussed on the high occuring events.  
 
-Manually mapping records suiting "High Wind" event type
+Manually mapping records suiting "High Wind" event type.
 ```{r Mapping High Wind}
 recorded_events$Off.Events[grepl("^TSTM",
                                  recorded_events$EVTYPE,
@@ -81,7 +81,7 @@ pct_valid <- round((sum(recorded_events$n[!is.na(recorded_events$Off.Events)])/s
 ```
 
 After manually mapping records, about `r pct_valid`% of records have so far been accounted for.  
-All other events will be categorized as "Other"
+All other events will be categorized as "Other".
 ```{r Mapping Other}
 recorded_events$Off.Events <- as.character(recorded_events$Off.Events)
 recorded_events$Off.Events[is.na(recorded_events$Off.Events)] <- "Other"
@@ -125,6 +125,7 @@ barplot(storm_plot$POPULATION_HARM,
         xlim = c(0,round_any(max(storm_plot$POPULATION_HARM), 5000, ceiling)))
 ```
 
+
 ###Across the United States, which types of events have the greatest economic consequences?
 
 ```{r Economic Consequence, fig.height=8, fig.width=10}
@@ -138,5 +139,5 @@ barplot(storm_plot$ECONOMIC_EFFECTS/10^6,
         xlim = c(0,round_any(max(storm_plot$ECONOMIC_EFFECTS/10^6), 10^5, ceiling)))
 ```
 
-[1]: http://www.ncdc.noaa.gov/stormevents/details.jsp?type=eventtype "NOAA storm data"
-[2]: http://www.nws.noaa.gov/directives/sym/pd01016005curr.pdf "Storm Data Documentation"
+[1]: http://www.nws.noaa.gov/directives/sym/pd01016005curr.pdf "Storm Data Documentation"  
+[2]: http://www.ncdc.noaa.gov/stormevents/details.jsp?type=eventtype "NOAA storm data"  
