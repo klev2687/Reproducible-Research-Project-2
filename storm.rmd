@@ -4,9 +4,10 @@ output:
   html_document:
       keep_md: TRUE
 ---
+##Synopsis
 The following analysis will serve to explore the storms and other severe events. Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern. This analysis involves exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
 
-#Data Processing
+##Data Processing
 
 Loading library packages required for the analysis. Please ensure to have the packages installed.
 ```{r message=FALSE, warning=FALSE}
@@ -65,8 +66,9 @@ pct_valid <- round((sum(recorded_events$n[!is.na(recorded_events$Off.Events)])/s
                    digits=0)
 ```
 
-About `r pct_valid`% of records have so far been accounted for.  
-Studying the recording events mapping table, there are some manual corrections that need to make. The manual correction will be focussed on the high occuring events.  
+About `r pct_valid`% of records have so far been accounted for.
+
+Studying the recording events mapping table, there are some manual corrections that are needed. The corrections will be focussed on the high occuring events.  
 
 Manually mapping records suiting "High Wind" event type.
 ```{r Mapping High Wind}
@@ -107,10 +109,11 @@ storm_data$CROPDMG[storm_data$CROPDMGEXP =="M"] <- storm_data$CROPDMG[storm_data
 storm_data$CROPDMG[storm_data$CROPDMGEXP =="B"] <- storm_data$CROPDMG[storm_data$CROPDMGEXP =="B"] * 10^9
 ```
 
-#Results
+##Results
 
-###Across the United States, which types of events are most harmful with respect to population health?
+>Across the United States, which types of events are most harmful with respect to population health?
 
+The data is summarized together as groups: Population Harm and Economic effects. Code below creates plot to answer above question only.
 ```{r Population plot, fig.height=8, fig.width=10}
 storm_plot <- storm_data %>% 
               group_by(EVTYPE) %>% 
@@ -125,9 +128,15 @@ barplot(storm_plot$POPULATION_HARM,
         xlim = c(0,round_any(max(storm_plot$POPULATION_HARM), 5000, ceiling)))
 ```
 
+<<<<<<< HEAD
 
 ###Across the United States, which types of events have the greatest economic consequences?
+=======
+>>>>>>> c51ed8d4354c8e022685219b2ad9eb8b92d30056
 
+>Across the United States, which types of events have the greatest economic consequences?
+
+Code below creates plot to answer the question.
 ```{r Economic Consequence, fig.height=8, fig.width=10}
 par(mar=c(5,10,2,2), las = 1)
 barplot(storm_plot$ECONOMIC_EFFECTS/10^6,
@@ -139,5 +148,10 @@ barplot(storm_plot$ECONOMIC_EFFECTS/10^6,
         xlim = c(0,round_any(max(storm_plot$ECONOMIC_EFFECTS/10^6), 10^5, ceiling)))
 ```
 
+<<<<<<< HEAD
 [1]: http://www.nws.noaa.gov/directives/sym/pd01016005curr.pdf "Storm Data Documentation"  
 [2]: http://www.ncdc.noaa.gov/stormevents/details.jsp?type=eventtype "NOAA storm data"  
+=======
+[1]:http://www.nws.noaa.gov/directives/sym/pd01016005curr.pdf/  "Storm Data Documentation"  
+[2]:http://www.ncdc.noaa.gov/stormevents/details.jsp?type=eventtype/  "NOAA"  
+>>>>>>> c51ed8d4354c8e022685219b2ad9eb8b92d30056
