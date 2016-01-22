@@ -16,8 +16,10 @@ library(dplyr)
 library(stringdist)
 ```
 
-Read data from zip file and running basic transformations.  
-```{r read/transform, cache=TRUE}
+Download data to current working directory. Read data from zip file and running basic transformations.  
+```{r download/read/transform, cache=TRUE}
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2",
+              "repdata%2Fdata%2FStormData.csv.bz2")
 rawdata <- read.csv("repdata-data-StormData.csv.bz2")
 rawdata$BGN_DATE <- mdy_hms(rawdata$BGN_DATE)
 ```
@@ -114,7 +116,8 @@ storm_data$CROPDMG[storm_data$CROPDMGEXP =="B"] <- storm_data$CROPDMG[storm_data
 ```{r Population plot, fig.height=8, fig.width=10}
 storm_plot <- storm_data %>% 
               group_by(EVTYPE) %>% 
-              summarise(POPULATION_HARM = sum(FATALITIES, INJURIES), ECONOMIC_EFFECTS = sum(PROPDMG,CROPDMG))
+              summarise(POPULATION_HARM = sum(FATALITIES, INJURIES), ECONOMIC_EFFECTS =sum(PROPDMG,CROPDMG))
+storm_plot <- storm_plot[order(storm_plot$POPULATION_HARM), ]
 par(mar=c(5,10,2,2), las = 1)
 barplot(storm_plot$POPULATION_HARM,
         horiz = TRUE,
@@ -129,6 +132,7 @@ barplot(storm_plot$POPULATION_HARM,
 ###Across the United States, which types of events have the greatest economic consequences?
 
 ```{r Economic Consequence, fig.height=8, fig.width=10}
+storm_plot <- storm_plot[order(storm_plot$ECONOMIC_EFFECTS), ]
 par(mar=c(5,10,2,2), las = 1)
 barplot(storm_plot$ECONOMIC_EFFECTS/10^6,
         horiz = TRUE,
