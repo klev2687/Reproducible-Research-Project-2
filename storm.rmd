@@ -73,7 +73,7 @@ About `r pct_valid`% of records have so far been accounted for.
 
 Studying the recording events mapping table, there are some manual corrections that need to make. The manual correction will be focussed on the high occuring events.  
 
-```{r Sample}
+```{r Display top events}
 head(recorded_events[order(recorded_events$n, decreasing = TRUE),], 10)
 ```
 
