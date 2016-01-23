@@ -4,7 +4,7 @@ output:
   html_document:
       keep_md: TRUE
 ---
-The following analysis will serve to explore the storms and other severe events. Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern. This analysis involves exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
+The following analysis will serve to explore the storms and other severe events. Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern. This analysis involves exploring the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database. This database analyses major storms and weather events in the United States estimating population harm and economic effects.
 
 #Data Processing
 
@@ -16,7 +16,7 @@ library(dplyr)
 library(stringdist)
 ```
 
-Download data to current working directory if it doesnt exist. Read data from zip file and running basic transformations.  
+Download data to current working directory if it doesnt exist. Read data from zip file. Converting BGN_DATE to date type.  
 ```{r download/read/transform, cache=TRUE}
 if(!file.exists("repdata%2Fdata%2FStormData.csv.bz2")){
   download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2",
