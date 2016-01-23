@@ -77,7 +77,7 @@ Studying the recording events mapping table, there are some manual corrections t
 head(recorded_events[order(recorded_events$n, decreasing = TRUE),], 10)
 ```
 
-Manually mapping records matching "High Wind" event type.
+Manually mapping records starting with "TSTM" to "High Wind" event type.
 ```{r Mapping High Wind}
 recorded_events$Off.Events[grepl("^TSTM",
                                  recorded_events$EVTYPE,
